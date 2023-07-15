@@ -24,9 +24,40 @@ app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
 });
 
+class DateFormatter{
+  static formatToUTC(dateObject){
+    if(dateObject.toString() === "Invalid Date") return {error : "Invalid Date"};
+    return {unix : dateObject.getTime(), utc : dateObject.toUTCString()};
+  }
+}
 
+app.get("/api/:date?", function(req,res){
+  //If no date is provided
+  if(!req.params.date){
+    let currentDate = new Date();
+    let returnObject = DateFormatter.formatToUTC(currentDate);
+    res.json(returnObject);
+    return;
+  }
+
+  let sentDateString = req.params.date;
+  let sentDateObject;
+
+  //If date string is not a timestamp
+  if(isNaN(sentDateString)){
+    sentDateObject = new Date(sentDateString);
+  }
+  //If date string is a timestamp
+  else{
+    sentDateObject = new Date(parseInt(sentDateString));
+  }
+
+  let returnObject = DateFormatter.formatToUTC(sentDateObject);
+  res.json(returnObject);
+})
 
 // listen for requests :)
-var listener = app.listen(process.env.PORT, function () {
+let port = process.env.port ?? 3000;
+var listener = app.listen(port, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });
